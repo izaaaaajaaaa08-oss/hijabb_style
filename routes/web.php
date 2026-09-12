@@ -27,6 +27,10 @@ Route::get('/', [ProductCatalogController::class, 'home'])->name('home');
 Route::get('/products', [ProductCatalogController::class, 'index'])->name('products.index');
 Route::get('/products/{product:slug}', [ProductCatalogController::class, 'show'])->name('products.show');
 
+// Alias routes agar nama 'catalog.index' dan 'catalog.show' dari frontend bisa berjalan
+Route::get('/catalog', [ProductCatalogController::class, 'index'])->name('catalog.index');
+Route::get('/catalog/{product:slug}', [ProductCatalogController::class, 'show'])->name('catalog.show');
+
 // ─── Midtrans Webhook (no auth/CSRF) ─────────────────────────────────────────
 Route::post('/webhook/midtrans', [MidtransWebhookController::class, 'handle'])
     ->name('midtrans.webhook')
@@ -41,28 +45,28 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
     // Cart
-    Route::get('/cart', [CartController::class, 'index'])->name('cart.index');
-    Route::post('/cart', [CartController::class, 'add'])->name('cart.add');
-    Route::patch('/cart/{cartItem}', [CartController::class, 'update'])->name('cart.update');
-    Route::delete('/cart/{cartItem}', [CartController::class, 'remove'])->name('cart.remove');
+    Route::get('/cart', [CartController::class, 'index'])->name('customer.cart.index');
+    Route::post('/cart', [CartController::class, 'add'])->name('customer.cart.store');
+    Route::patch('/cart/{cartItem}', [CartController::class, 'update'])->name('customer.cart.update');
+    Route::delete('/cart/{cartItem}', [CartController::class, 'remove'])->name('customer.cart.destroy');
 
     // Wishlist
-    Route::get('/wishlist', [WishlistController::class, 'index'])->name('wishlist.index');
-    Route::post('/wishlist/{product}', [WishlistController::class, 'toggle'])->name('wishlist.toggle');
+    Route::get('/wishlist', [WishlistController::class, 'index'])->name('customer.wishlist.index');
+    Route::post('/wishlist/{product}', [WishlistController::class, 'toggle'])->name('customer.wishlist.toggle');
 
-    // Checkout (requires being logged in as customer)
+    // Checkout
     Route::middleware('customer')->group(function () {
-        Route::get('/checkout', [CheckoutController::class, 'index'])->name('checkout.index');
-        Route::post('/checkout', [CheckoutController::class, 'store'])->name('checkout.store');
-        Route::post('/checkout/payment-notification', [CheckoutController::class, 'paymentNotification'])->name('checkout.payment-notification');
+        Route::get('/checkout', [CheckoutController::class, 'index'])->name('customer.checkout.index');
+        Route::post('/checkout', [CheckoutController::class, 'store'])->name('customer.checkout.store');
     });
 
     // Orders
-    Route::get('/orders', [OrderHistoryController::class, 'index'])->name('orders.index');
-    Route::get('/orders/{order}', [OrderHistoryController::class, 'show'])->name('orders.show');
+    Route::get('/orders', [OrderHistoryController::class, 'index'])->name('customer.orders.index');
+    Route::get('/orders/{order}', [OrderHistoryController::class, 'show'])->name('customer.orders.show');
+    Route::post('/orders/{order}/simulate-payment', [OrderHistoryController::class, 'simulatePayment'])->name('customer.orders.simulate-payment');
 
     // Reviews
-    Route::post('/reviews', [ReviewController::class, 'store'])->name('reviews.store');
+    Route::post('/reviews', [ReviewController::class, 'store'])->name('customer.reviews.store');
 });
 
 // ─── Admin Routes ─────────────────────────────────────────────────────────────
